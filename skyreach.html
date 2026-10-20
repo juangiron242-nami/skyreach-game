@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skyreach (free-play demo)</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="skyreach.css">
+</head>
+<body>
+<div id="topbar">
+  <div class="top-title">Skyreach <span id="fastTag" class="fast-tag" hidden>FAST DEMO</span></div>
+  <div class="res-row">
+    <div class="res"><span class="res-name">Grain</span><span id="rGrain" class="res-val">0</span></div>
+    <div class="res"><span class="res-name">Timber</span><span id="rTimber" class="res-val">0</span></div>
+    <div class="res"><span class="res-name">Ore</span><span id="rOre" class="res-val">0</span></div>
+    <div class="res"><span class="res-name">Gold</span><span id="rGold" class="res-val">0</span></div>
+    <div class="res"><span class="res-name">Gems</span><span id="rGems" class="res-val">0</span></div>
+    <div class="res"><span class="res-name">Shards</span><span id="rShards" class="res-val">0</span></div>
+  </div>
+  <div id="shieldBar" class="shield-bar"></div>
+</div>
+
+<nav id="tabs">
+  <button data-tab="isle">Isle</button>
+  <button data-tab="army">Army &amp; Raids</button>
+  <button data-tab="forecast">Forecast</button>
+  <button data-tab="chat">Chat <span id="chatBadge" class="badge" hidden></span></button>
+  <button data-tab="market">Market</button>
+  <button data-tab="shop">Shop</button>
+  <button data-tab="help">Help</button>
+</nav>
+
+<main>
+  <div id="toast" class="toast" aria-live="polite" hidden></div>
+  <div id="view"></div>
+</main>
+
+<footer>
+  <p>Play points only. No cash value. Points, Gems and Shards can't be bought, cashed out, or traded for prizes.</p>
+  <p>Free-play demo for adults 18+. Not financial advice. Everything is saved only in this browser.</p>
+</footer>
+<script src="skyreach.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><link rel="icon" href="data:,"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Guitar Practice</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#111;color:#fff;font-size:22px}
+main{max-width:520px;margin:0 auto;padding:16px 16px 140px;min-height:100vh}
+h1{font-size:30px;margin:8px 0}p{line-height:1.4;margin:10px 0}.small{font-size:18px;color:#bbb}
+button{font:inherit;font-weight:700;border:0;border-radius:18px;padding:20px;min-height:72px;width:100%;margin:6px 0;background:#2d6cdf;color:#fff}
+button.alt{background:#333}button.ok{background:#1f9d55}button:active{transform:scale(.98)}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#111;padding:10px 16px 20px;display:flex;gap:10px;max-width:520px;margin:0 auto}
+.nav button{margin:0}.tabs{display:flex;gap:8px}.tabs button{min-height:56px;padding:10px;font-size:18px}
+.dots{display:flex;gap:8px;justify-content:center;margin:16px 0}.dot{width:56px;height:56px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:20px}
+.dot.on{background:#f5b301;color:#000}.chordnow{font-size:72px;text-align:center;font-weight:800;margin:6px}
+.row{display:flex;gap:10px;align-items:center}.row button{width:80px}.bpm{font-size:48px;font-weight:800;flex:1;text-align:center}
+.diagrams{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}svg{background:#fff;border-radius:12px}
+input,textarea{font:inherit;width:100%;padding:14px;border-radius:12px;border:0;margin:4px 0 10px}label{font-size:18px}
+.log{background:#222;border-radius:12px;padding:10px;margin:8px 0;font-size:18px}.done{color:#5fdc8e}
+</style></head><body><main id="app"></main>
+<div class="nav" id="nav"><button class="alt" id="back">Back</button><button id="next">Next</button></div>
+<script>
+const SONG="Kinda Crazy (acoustic) by Gringo the MC";
+// strings index 0..5 = string 6 (low E) .. string 1; dots [string, fret, finger]
+const CH={Em:{mute:[],dots:[[5,2,"M"],[4,2,"R"]]},Am:{mute:[6],dots:[[2,1,"I"],[4,2,"M"],[3,2,"R"]]},
+B7:{mute:[6],dots:[[4,1,"I"],[5,2,"M"],[3,2,"R"],[1,2,"P"]]}};
+function svg(n,s=1){const c=CH[n],W=150*s,H=190*s,x0=25*s,dx=20*s,y0=45*s,dy=32*s;let o=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${n} chord">`;
+o+=`<text x="${W/2}" y="${20*s}" font-size="${20*s}" text-anchor="middle" font-weight="700">${n}</text>`;
+o+=`<rect x="${x0}" y="${y0-4*s}" width="${dx*5}" height="${5*s}" fill="#000"/>`;
+for(let i=0;i<6;i++)o+=`<line x1="${x0+i*dx}" y1="${y0}" x2="${x0+i*dx}" y2="${y0+dy*4}" stroke="#000" stroke-width="${1.5*s}"/>`;
+for(let f=1;f<=4;f++)o+=`<line x1="${x0}" y1="${y0+f*dy}" x2="${x0+5*dx}" y2="${y0+f*dy}" stroke="#555"/>`;
+for(let st=1;st<=6;st++){const x=x0+(6-st)*dx;if(c.mute.includes(st))o+=`<text x="${x}" y="${y0-10*s}" font-size="${14*s}" text-anchor="middle">✕</text>`;
+else if(!c.dots.some(d=>d[0]==st))o+=`<circle cx="${x}" cy="${y0-14*s}" r="${5*s}" fill="none" stroke="#000" stroke-width="${1.5*s}"/>`;}
+for(const[st,f,fi]of c.dots){const x=x0+(6-st)*dx,y=y0+(f-.5)*dy;o+=`<circle cx="${x}" cy="${y}" r="${9*s}" fill="#2d6cdf"/><text x="${x}" y="${y+5*s}" font-size="${13*s}" fill="#fff" text-anchor="middle" font-weight="700">${fi}</text>`;}
+return o+`<text x="${W/2}" y="${H-6*s}" font-size="${11*s}" text-anchor="middle" fill="#444">I M R P = fingers · ○ open · ✕ skip</text></svg>`;}
+const STEPS=[
+{t:"Hi Joney",b:`Today: ${SONG}.<br>3 chords. Go slow. One step at a time.`,c:["Em","Am","B7"]},
+{t:"Capo on fret 3",b:"Put the capo on fret 3.<br>Tune if it sounds off."},
+{t:"Em",b:"Middle: string 5, fret 2.<br>Ring: string 4, fret 2.<br>Strum all 6. All ring? Good.",c:["Em"]},
+{t:"Am",b:"Index: string 2, fret 1.<br>Middle: string 4, fret 2.<br>Ring: string 3, fret 2.<br>Strum from string 5.",c:["Am"]},
+{t:"B7",b:"Index: string 4, fret 1.<br>Middle: string 5, fret 2.<br>Ring: string 3, fret 2.<br>Pinky: string 1, fret 2.<br>String 2 open. Strum from string 5.<p class=small>Too hard? Skip the pinky for now.</p>",c:["B7"]},
+{t:"Em → Am",b:"Switch 10 times. Slow.<p class=small>Easy one: same 2 fingers move down one string, add index.</p>",c:["Em","Am"]},
+{t:"Am → B7",b:"Switch 10 times. Slow.",c:["Am","B7"]},
+{t:"B7 → Em",b:"Switch 10 times. Slow.",c:["B7","Em"]},
+{t:"Full loop",b:"Em 4 counts. Am 2. B7 2. Repeat.<br>One down strum per count.<br>Use the beat below. Start at 60.",m:1},
+{t:"Speed up",b:"A little faster each day.<br>Goal: about 80.",m:1},
+{t:"Play along",b:`Play with the reel or the song:<br>${SONG}.`},
+{t:"Check",b:"Loop 4 times, no stop?<br>B7 rings (easy one is OK)?<p class=small>Stuck? Do just that switch 2 minutes, then stop.</p>"},
+{t:"Log",log:1}];
+const K="gtr1";let S=JSON.parse(localStorage.getItem(K)||"{}");S.i??=0;S.done??={};S.log??=[];S.bpm??=60;
+const save=()=>localStorage.setItem(K,JSON.stringify(S));
+const app=document.getElementById("app");
+function render(){const st=STEPS[S.i];let h=`<p class=small>Step ${S.i+1} of ${STEPS.length}${S.done[S.i]?' · <span class=done>✓ done</span>':''}</p><h1>${st.t}</h1>`;
+if(st.b)h+=`<p>${st.b}</p>`;if(st.c)h+=`<div class=diagrams>${st.c.map(n=>svg(n,st.c.length>2?.75:1)).join("")}</div>`;
+if(st.m)h+=metroHTML();if(st.log)h+=logHTML();
+if(!st.log)h+=`<button class="${S.done[S.i]?'ok':'alt'}" id=chk>${S.done[S.i]?'✓ Done':'Mark done'}</button>`;
+app.innerHTML=h;document.getElementById("back").disabled=S.i==0;document.getElementById("next").textContent=S.i==STEPS.length-1?"Start over":"Next";
+const c=document.getElementById("chk");if(c)c.onclick=()=>{S.done[S.i]=!S.done[S.i];save();render()};if(st.m)bindMetro();if(st.log)bindLog();}
+document.getElementById("next").onclick=()=>{stop();S.i=(S.i+1)%STEPS.length;save();render();scrollTo(0,0)};
+document.getElementById("back").onclick=()=>{stop();if(S.i>0)S.i--;save();render();scrollTo(0,0)};
+// metronome: 8-count loop Em x4, Am x2, B7 x2
+const LOOP=["Em","Em","Em","Em","Am","Am","B7","B7"],SAY=["Em","2","3","4","Am","2","B7","2"];let ac,timer,beat=0,nextT=0,playing=false,q=[];
+function metroHTML(){return `<div class=chordnow id=cn>Em</div><div class=dots>${SAY.map((s,i)=>`<div class=dot id=d${i}>${s}</div>`).join("").replace(/(<div class=dot id=d3>.*?<\/div>)/,"$1</div><div class=dots>")}</div>
+<div class=row><button class=alt id=slow>−</button><div class=bpm><span id=bpm>${S.bpm}</span><div class=small>beats/min</div></div><button class=alt id=fast>+</button></div>
+<button id=play>${playing?'Stop':'Start beat'}</button>`;}
+function bindMetro(){const u=d=>{S.bpm=Math.min(90,Math.max(50,S.bpm+d));save();document.getElementById("bpm").textContent=S.bpm};
+slow.onclick=()=>u(-5);fast.onclick=()=>u(5);play.onclick=()=>playing?stop():start();}
+function click(t,acc){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=acc?1500:900;g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.07);}
+function start(){ac??=new (window.AudioContext||window.webkitAudioContext)();ac.resume();playing=true;beat=0;nextT=ac.currentTime+.1;q=[];timer=setInterval(sched,25);requestAnimationFrame(draw);const p=document.getElementById("play");if(p)p.textContent="Stop";}
+function stop(){playing=false;clearInterval(timer);const p=document.getElementById("play");if(p)p.textContent="Start beat";}
+function sched(){while(nextT<ac.currentTime+.1){click(nextT,beat==0||beat==4||beat==6);q.push([beat,nextT]);nextT+=60/S.bpm;beat=(beat+1)%8;}}
+function draw(){if(!playing)return;let cur=null;while(q.length&&q[0][1]<=ac.currentTime)cur=q.shift()[0];
+if(cur!==null){for(let i=0;i<8;i++){const d=document.getElementById("d"+i);d&&d.classList.toggle("on",i==cur)}const cn=document.getElementById("cn");if(cn)cn.textContent=LOOP[cur];}requestAnimationFrame(draw);}
+function logHTML(){const today=new Date().toLocaleDateString("en-CA");return `<p>Write down today.</p><label>Date<input type=date id=ld value="${today}"></label>
+<label>Minutes<input type=number inputmode=numeric id=lm min=1 placeholder="10"></label><label>What felt hard?<textarea id=lh rows=2></textarea></label>
+<button class=ok id=ls>Save</button>${S.log.slice().reverse().map(e=>`<div class=log><b>${e.d}</b> · ${e.m} min<br>${e.h.replace(/</g,"&lt;")||"—"}</div>`).join("")}`;}
+function bindLog(){ls.onclick=()=>{if(!lm.value)return lm.focus();S.log.push({d:ld.value,m:+lm.value,h:lh.value});save();render();};}
+render();
+</script></body></html>
